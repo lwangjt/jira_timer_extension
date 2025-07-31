@@ -21,8 +21,8 @@ const priorityFilter = document.getElementById("priority-filter");
 // Mock JIRA data
 const mockUser = {
   name: "Lisa Wang",
-  email: "lisa.wang@company.com",
-  department: "Engineering"
+  email: "lisa.wang@syf.com",
+  department: "Data"
 };
 
 const mockTasks = [

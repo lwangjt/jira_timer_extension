@@ -41,20 +41,6 @@
       opacity: 0.9;
     }
     
-    .task-info {
-      background: rgba(255, 255, 255, 0.2);
-      padding: 20px;
-      border-radius: 10px;
-      margin: 30px 0;
-      font-size: 16px;
-    }
-    
-    .task-key {
-      font-weight: bold;
-      font-size: 18px;
-      color: #FFD700;
-    }
-    
     button {
       background: rgba(255, 255, 255, 0.2);
       color: white;
@@ -79,27 +65,10 @@
     <h2>You're in Focus Mode</h2>
     <p class="message">Stay focused and resist the distraction!</p>
     
-    <div class="task-info" id="task-info">
-      <div>Currently working on:</div>
-      <div class="task-key" id="current-task">Loading...</div>
-    </div>
-    
     <p class="message">You got this! Your future self will thank you.</p>
     
     <button onclick="window.history.back()">Go Back</button>
     <button onclick="window.close()">Close Tab</button>
   </div>
-
-  <script>
-    // Get current task information from storage
-    chrome.storage.local.get(['focusTask', 'taskData'], function(result) {
-      const taskInfo = document.getElementById('current-task');
-      if (result.focusTask) {
-        taskInfo.textContent = result.focusTask;
-      } else {
-        taskInfo.textContent = 'Focus Session';
-      }
-    });
-  </script>
 </body>
 </html>
