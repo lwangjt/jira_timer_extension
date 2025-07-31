@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>JIRA Focus Timer Settings</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background-color: #f8f9fa;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .section {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .section h3 {
+      margin-top: 0;
+      color: #333;
+      border-bottom: 2px solid #4285f4;
+      padding-bottom: 10px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #555;
+    }
+    
+    input[type="text"], input[type="url"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 15px;
+      box-sizing: border-box;
+    }
+    
+    input[type="text"]:focus, input[type="url"]:focus {
+      border-color: #4285f4;
+      outline: none;
+    }
+    
+    button {
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #3367d6;
+    }
+    
+    .demo-note {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    
+    .demo-note strong {
+      color: #856404;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>JIRA Focus Timer Settings</h1>
+    <p class="subtitle">Configure your JIRA integration and focus preferences</p>
+  </div>
+
+  <div class="demo-note">
+    <strong>Demo Mode:</strong> This extension is currently running with mock JIRA data. In a production environment, you would configure your JIRA server connection here.
+  </div>
+
+  <div class="section">
+    <h3>JIRA Configuration</h3>
+    <label for="jiraUrl">JIRA Server URL:</label>
+    <input type="url" id="jiraUrl" placeholder="https://your-company.atlassian.net" disabled>
+    
+    <label for="jiraEmail">Email:</label>
+    <input type="text" id="jiraEmail" placeholder="your.email@company.com" disabled>
+    
+    <label for="apiToken">API Token:</label>
+    <input type="text" id="apiToken" placeholder="Your JIRA API token" disabled>
+    
+    <p style="font-size: 12px; color: #666;">
+      <em>Note: Real JIRA integration would require API credentials and proper security handling.</em>
+    </p>
+  </div>
+
+  <div class="section">
+    <h3>Website Blocking</h3>
+    <label for="blockedSitesInput">Blocked Sites (comma-separated):</label>
+    <input type="text" id="blockedSitesInput" placeholder="youtube.com, twitter.com, facebook.com">
+    
+    <button id="saveBtn">Save Settings</button>
+  </div>
+
+  <div class="section">
+    <h3>Timer Preferences</h3>
+    <label for="defaultDuration">Default Focus Duration (minutes):</label>
+    <input type="text" id="defaultDuration" placeholder="25">
+    
+    <label for="breakDuration">Break Duration (minutes):</label>
+    <input type="text" id="breakDuration" placeholder="5">
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
+
+<script src="options.js"></script>
+</body>
+</html>

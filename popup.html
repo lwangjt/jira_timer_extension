@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      width: 500px;
+      min-height: 400px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f8f9fa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4285f4, #34a853);
+      color: white;
+      padding: 15px 20px;
+      text-align: center;
+    }
+
+    .header h3 {
+      margin: 0 0 5px 0;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .user-greeting {
+      font-size: 14px;
+      opacity: 0.9;
+      margin: 0;
+    }
+
+    .main-content {
+      display: flex;
+      flex: 1;
+      min-height: 350px;
+    }
+
+    /* LEFT PANEL - TASK LIST */
+    .task-panel {
+      width: 45%;
+      background: white;
+      border-right: 1px solid #e0e0e0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .task-header {
+      padding: 15px;
+      border-bottom: 1px solid #e0e0e0;
+      background: #fafafa;
+    }
+
+    .task-header h4 {
+      margin: 0 0 15px 0;
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    /* Filters */
+    .filters {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter-group label {
+      font-size: 12px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .filter-select {
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 12px;
+      background: white;
+      color: #333;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: #4285f4;
+    }
+
+    .task-list {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 300px;
+    }
+
+    .task-item {
+      padding: 12px 15px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .task-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .task-item.active {
+      background-color: #e3f2fd;
+      border-left: 3px solid #4285f4;
+    }
+
+    .task-item.ongoing {
+      background-color: #e1f5fe;
+      border-left: 3px solid #00bcd4;
+      box-shadow: 0 2px 8px rgba(0, 188, 212, 0.15);
+    }
+
+    .task-item.ongoing .task-key {
+      color: #00bcd4;
+      font-weight: 700;
+    }
+
+    .task-item.ongoing .task-summary {
+      color: #006064;
+    }
+
+    .ongoing-indicator {
+      display: none;
+      font-size: 10px;
+      color: #00bcd4;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+
+    .task-item.ongoing .ongoing-indicator {
+      display: block;
+    }
+
+    .task-key {
+      font-weight: 600;
+      font-size: 12px;
+      color: #4285f4;
+    }
+
+    .task-summary {
+      font-size: 13px;
+      color: #333;
+      line-height: 1.3;
+    }
+
+    .task-status {
+      font-size: 11px;
+      color: #666;
+      background: #f0f0f0;
+      padding: 2px 6px;
+      border-radius: 3px;
+      align-self: flex-start;
+    }
+
+    /* RIGHT PANEL - TASK DETAILS & TIMER */
+    .details-panel {
+      width: 55%;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .task-details {
+      flex: 1;
+      margin-bottom: 20px;
+    }
+
+    .task-details h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .task-description {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+
+    .task-meta {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .meta-item {
+      font-size: 12px;
+    }
+
+    .meta-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .meta-value {
+      color: #333;
+      font-weight: 600;
+    }
+
+    /* TIMER SECTION */
+    .timer-section {
+      border-top: 1px solid #e0e0e0;
+      padding-top: 20px;
+    }
+
+    .timer-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+
+    .timer-display {
+      font-size: 28px;
+      font-weight: bold;
+      color: #4285f4;
+      margin-bottom: 10px;
+    }
+
+    .timer-controls {
+      margin-bottom: 20px;
+    }
+
+    .timer-slider-container {
+      margin-bottom: 15px;
+    }
+
+    .timer-label {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .timer-slider {
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #e0e0e0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .timer-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4285f4;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .timer-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #4285f4;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .control-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .start-btn {
+      background-color: #4285f4;
+      color: white;
+    }
+
+    .start-btn:hover:not(:disabled) {
+      background-color: #3367d6;
+    }
+
+    .start-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .stop-btn {
+      background-color: #ea4335;
+      color: white;
+    }
+
+    .stop-btn:hover {
+      background-color: #d33b2c;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #666;
+    }
+
+    /* PLACEHOLDER STATE */
+    .placeholder {
+      text-align: center;
+      color: #999;
+      font-style: italic;
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h3>JIRA Focus Timer</h3>
+    <p class="user-greeting" id="user-greeting">Hello, Lisa</p>
+  </div>
+
+  <div class="main-content">
+    <!-- LEFT PANEL: TASK LIST -->
+    <div class="task-panel">
+      <div class="task-header">
+        <h4>My Assigned Tasks</h4>
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filter-group">
+            <label for="status-filter">Status:</label>
+            <select id="status-filter" class="filter-select">
+              <option value="">All Statuses</option>
+              <option value="To Do">To Do</option>
+              <option value="In Progress">In Progress</option>
+              <option value="In Review">In Review</option>
+              <option value="Ready for Testing">Ready for Testing</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="priority-filter">Priority:</label>
+            <select id="priority-filter" class="filter-select">
+              <option value="">All Priorities</option>
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="task-list" id="task-list">
+        <!-- Tasks will be populated by JavaScript -->
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: TASK DETAILS & TIMER -->
+    <div class="details-panel">
+      <div class="task-details" id="task-details">
+        <div class="placeholder">
+          Select a task to start tracking time
+        </div>
+      </div>
+
+      <div class="timer-section" id="timer-section" style="display: none;">
+        <div class="timer-header">
+          <div class="timer-display" id="timer-display">00:00</div>
+        </div>
+        
+        <div class="timer-controls">
+          <div class="timer-slider-container">
+            <div class="timer-label">
+              Duration: <span id="timer-value">25</span> minutes
+            </div>
+            <input 
+              type="range" 
+              id="timer-slider" 
+              class="timer-slider"
+              min="5" 
+              max="60" 
+              step="5" 
+              value="25"
+            >
+          </div>
+          
+          <div class="control-buttons">
+            <button id="start-btn" class="start-btn">Start Focus</button>
+            <button id="stop-btn" class="stop-btn">Stop</button>
+          </div>
+        </div>
+        
+        <div class="status" id="status">Ready to start focusing</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
+
