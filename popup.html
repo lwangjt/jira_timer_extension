@@ -329,6 +329,62 @@
       font-style: italic;
       margin-top: 50px;
     }
+
+    /* CALENDAR AND SUGGESTED BLOCKS */
+    #calendar {
+      margin-bottom: 20px;
+    }
+
+    #suggested-blocks {
+      margin-top: 20px;
+    }
+
+    #block-list {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    #block-list li {
+      background: #f1f1f1;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #block-list li span {
+      font-size: 14px;
+      color: #333;
+    }
+
+    #schedule-blocks {
+      background-color: #34a853;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s ease;
+    }
+
+    #schedule-blocks:hover {
+      background-color: #28a745;
+    }
+
+    /* CALENDAR CONTAINER */
+    #calendar-container {
+      display: none;
+      margin-top: 20px;
+    }
+
+    #calendar-container h2 {
+      font-size: 16px;
+      color: #333;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -409,6 +465,20 @@
         <div class="status" id="status">Ready to start focusing</div>
       </div>
     </div>
+  </div>
+
+  <!-- ADDITIONAL CONTROLS: TOGGLE CALENDAR VIEW -->
+  <div id="filters">
+    <!-- Existing filters go here -->
+  </div>
+
+  <!-- Add a button to toggle the calendar view -->
+  <button id="toggle-calendar">View Calendar</button>
+
+  <!-- Calendar container -->
+  <div id="calendar-container" style="display: none;">
+    <h2>Scheduled Focus Blocks</h2>
+    <div id="calendar"></div>
   </div>
 
   <script src="popup.js"></script>

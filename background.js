@@ -157,7 +157,9 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
       focusActive: true,
       focusEndTime: focusEndTime,
       focusTask: msg.taskKey,
-      taskData: currentTask
+      taskData: currentTask // Ensure task data is stored
+    }, () => {
+      console.log("Task data saved to storage:", currentTask);
     });
 
     chrome.alarms.create("endFocus", { when: focusEndTime });
@@ -219,6 +221,42 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
     console.log("Suggested free slots for August 1st:", hardcodedFreeSlots);
     sendResponse({ status: "Free slots found", freeSlots: hardcodedFreeSlots });
+    return true; // Keep the message channel open for async response
+  }
+
+  if (msg.command === "SCHEDULE_MULTIPLE_FOCUS_BLOCKS") {
+    const { blocks } = msg; // Array of focus blocks to schedule
+    chrome.identity.getAuthToken({ interactive: true }, (token) => {
+      if (chrome.runtime.lastError) {
+        sendResponse({ status: "Failed to get auth token" });
+        return;
+      }
+
+      blocks.forEach(block => {
+        const start = new Date(block.start);
+        const end = new Date(block.end);
+        scheduleFocusBlock(token, start, end);
+      });
+
+      // Store scheduled blocks in chrome.storage
+      chrome.storage.local.get({ scheduledBlocks: [] }, (data) => {
+        const updatedBlocks = [...data.scheduledBlocks, ...blocks];
+        chrome.storage.local.set({ scheduledBlocks: updatedBlocks }, () => {
+          sendResponse({ status: "Focus blocks scheduled", scheduledBlocks: updatedBlocks });
+        });
+      });
+    });
+    return true; // Keep the message channel open for async response
+  }
+
+  if (msg.command === "GET_CURRENT_TASK") {
+    chrome.storage.local.get(["taskData"], (data) => {
+      if (data.taskData) {
+        sendResponse({ status: "Task retrieved", task: data.taskData });
+      } else {
+        sendResponse({ status: "No active task" });
+      }
+    });
     return true; // Keep the message channel open for async response
   }
 });

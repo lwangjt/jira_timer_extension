@@ -112,6 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadTasks();
   setupEventListeners();
   checkTimerState();
+  loadCurrentTask(); // Fetch and display the current task
 });
 
 function loadUserInfo() {
@@ -242,6 +243,82 @@ function setupEventListeners() {
   stopBtn.addEventListener('click', function() {
     stopFocusSession();
   });
+  
+  // Calendar block selection
+  document.getElementById("schedule-blocks").addEventListener("click", () => {
+    const selectedBlocks = [];
+    document.querySelectorAll("#block-list input:checked").forEach(input => {
+      const index = input.getAttribute("data-index");
+      selectedBlocks.push(suggestedBlocks[index]);
+    });
+
+    chrome.runtime.sendMessage({ command: "SCHEDULE_MULTIPLE_FOCUS_BLOCKS", blocks: selectedBlocks }, (response) => {
+      if (response.status === "Focus blocks scheduled") {
+        alert("Focus blocks scheduled successfully!");
+      }
+    });
+  });
+  
+  document.addEventListener("DOMContentLoaded", () => {
+    const toggleCalendarButton = document.getElementById("toggle-calendar");
+    const calendarContainer = document.getElementById("calendar-container");
+    const calendarDiv = document.getElementById("calendar");
+
+    if (!toggleCalendarButton || !calendarContainer || !calendarDiv) {
+      console.error("Required elements not found in the DOM.");
+      return;
+    }
+
+    // Toggle the calendar view
+    toggleCalendarButton.addEventListener("click", () => {
+      console.log("Toggle Calendar button clicked."); // Debugging log
+
+      if (calendarContainer.style.display === "none" || calendarContainer.style.display === "") {
+        console.log("Showing calendar."); // Debugging log
+        calendarContainer.style.display = "block";
+        toggleCalendarButton.textContent = "Hide Calendar";
+
+        // Fetch and display scheduled focus blocks
+        chrome.storage.local.get({ scheduledBlocks: [] }, (data) => {
+          console.log("Fetched scheduled blocks:", data.scheduledBlocks); // Debugging log
+          calendarDiv.innerHTML = ""; // Clear existing content
+          if (data.scheduledBlocks.length === 0) {
+            calendarDiv.textContent = "No focus blocks scheduled.";
+          } else {
+            data.scheduledBlocks.forEach(block => {
+              const blockDiv = document.createElement("div");
+              blockDiv.textContent = `${new Date(block.start).toLocaleString()} - ${new Date(block.end).toLocaleString()}`;
+              calendarDiv.appendChild(blockDiv);
+            });
+          }
+        });
+      } else {
+        console.log("Hiding calendar."); // Debugging log
+        calendarContainer.style.display = "none";
+        toggleCalendarButton.textContent = "View Calendar";
+      }
+    });
+  });
+}
+
+function loadCurrentTask() {
+  taskDetails.innerHTML = '<p>Loading...</p>'; // Show loading message initially
+
+  chrome.runtime.sendMessage({ command: "GET_CURRENT_TASK" }, (response) => {
+    if (response.status === "Task retrieved" && response.task) {
+      const task = response.task;
+      // Update the UI with the current task
+      taskDetails.innerHTML = `
+        <h3>${task.key}: ${task.summary}</h3>
+        <p>Duration: ${task.duration} minutes</p>
+        <p>Started: ${new Date(task.startTime).toLocaleTimeString()}</p>
+      `;
+      timerSection.style.display = 'block'; // Ensure the timer section is visible
+    } else {
+      taskDetails.innerHTML = '<p>No active task</p>';
+      timerSection.style.display = 'none'; // Hide the timer section if no task
+    }
+  });
 }
 
 function startFocusSession(duration) {
@@ -354,31 +431,25 @@ function logTimeToTask(task, minutes) {
 }
 
 function checkTimerState() {
-  // Check if timer is already running from previous session
-  chrome.storage.local.get(['focusActive', 'focusEndTime', 'focusTask'], function(result) {
+  chrome.storage.local.get(['focusActive', 'focusEndTime', 'focusTask', 'taskData'], function(result) {
     if (result.focusActive && result.focusEndTime) {
       const timeLeft = result.focusEndTime - Date.now();
       if (timeLeft > 0) {
         isTimerRunning = true;
-        
+
         // Set ongoing task
-        if (result.focusTask) {
-          ongoingTaskKey = result.focusTask;
-          status.textContent = `Focusing on ${result.focusTask}`;
-          // Find and select the task in the list
-          const task = mockTasks.find(t => t.key === result.focusTask);
-          if (task) {
-            selectTask(task);
-          }
+        if (result.taskData) {
+          ongoingTaskKey = result.taskData.key;
+          status.textContent = `Currently working on: ${result.taskData.key} - ${result.taskData.summary}`;
+          selectTask(result.taskData); // Ensure task details are displayed
+          startTimer(timeLeft);
+        } else {
+          console.warn("Task data not found in storage.");
+          status.textContent = "Currently working on: Loading...";
         }
-        
-        startTimer(timeLeft);
-        startBtn.disabled = true;
-        timerSlider.disabled = true;
-        
-        // Refresh task list to show ongoing indicator
-        loadTasks();
       }
+    } else {
+      status.textContent = "No active focus session.";
     }
   });
 }

@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Focus Blocks",
-  "description": "Reclaim your time, one block at a time. Now with Google Calendar integration.",
+  "description": "Reclaim your time, one block at a time.",
   "version": "1.1",
   "permissions": [
     "identity",
