@@ -355,7 +355,7 @@ function logTimeToTask(task, minutes) {
 
 function checkTimerState() {
   // Check if timer is already running from previous session
-  chrome.storage.local.get(['focusActive', 'focusEndTime', 'focusTask'], function(result) {
+  chrome.storage.local.get(['focusActive', 'focusEndTime', 'focusTask', 'onBreak', 'breakEndTime'], function(result) {
     if (result.focusActive && result.focusEndTime) {
       const timeLeft = result.focusEndTime - Date.now();
       if (timeLeft > 0) {
@@ -364,7 +364,19 @@ function checkTimerState() {
         // Set ongoing task
         if (result.focusTask) {
           ongoingTaskKey = result.focusTask;
-          status.textContent = `Focusing on ${result.focusTask}`;
+          
+          // Check if on break
+          if (result.onBreak && result.breakEndTime) {
+            const breakTimeLeft = result.breakEndTime - Date.now();
+            if (breakTimeLeft > 0) {
+              status.textContent = `On 1-min break from ${result.focusTask} (${Math.ceil(breakTimeLeft / 1000)}s left)`;
+            } else {
+              status.textContent = `Focusing on ${result.focusTask}`;
+            }
+          } else {
+            status.textContent = `Focusing on ${result.focusTask}`;
+          }
+          
           // Find and select the task in the list
           const task = mockTasks.find(t => t.key === result.focusTask);
           if (task) {

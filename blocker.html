@@ -57,6 +57,12 @@
       background: rgba(255, 255, 255, 0.3);
       transform: translateY(-2px);
     }
+    
+    .debug {
+      margin-top: 20px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
@@ -67,8 +73,10 @@
     
     <p class="message">You got this! Your future self will thank you.</p>
     
-    <button onclick="window.history.back()">Go Back</button>
-    <button onclick="window.close()">Close Tab</button>
+    <button id="breakBtn">Take 1 Min Break</button>
+    <button id="closeBtn">Close Tab</button>
   </div>
+  
+  <script src="blocker.js"></script>
 </body>
 </html>

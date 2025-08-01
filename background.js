@@ -25,6 +25,7 @@ let allowedSites = [
 ];
 let focusEndTime = null;
 let currentTask = null;
+let onBreak = false; // Track if user is on a temporary break
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.command === "START_FOCUS") {
@@ -72,6 +73,33 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     sendResponse({ status: "Focus stopped" });
     currentTask = null;
   }
+  
+  if (msg.action === "takeBreak") {
+    console.log('Received takeBreak message with duration:', msg.duration);
+    onBreak = true;
+    
+    // Remove blur from all tabs immediately
+    removeBlurFromAllTabs();
+    
+    // Also clear any pending alarms to prevent interference
+    chrome.alarms.clear("endBreak");
+    
+    // Set a 1-minute timer to re-enable focus mode
+    chrome.alarms.create("endBreak", { when: Date.now() + msg.duration });
+    
+    // Store break state
+    chrome.storage.local.set({
+      onBreak: true,
+      breakEndTime: Date.now() + msg.duration
+    });
+    
+    console.log('Break started, onBreak set to true');
+    sendResponse({ success: true });
+    return true; // Keep the message channel open for async response
+  }
+  
+  // Return true if we might send a response asynchronously
+  return true;
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
@@ -109,14 +137,56 @@ chrome.alarms.onAlarm.addListener((alarm) => {
     
     currentTask = null;
   }
+  
+  if (alarm.name === "endBreak") {
+    onBreak = false;
+    
+    // Clear break state
+    chrome.storage.local.set({
+      onBreak: false,
+      breakEndTime: null
+    });
+    
+    // If focus is still active, re-apply blur to non-allowed sites
+    if (focusActive) {
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach(tab => {
+          if (tab.url && !tab.url.startsWith('chrome://') && !tab.url.startsWith('chrome-extension://')) {
+            const isAllowed = allowedSites.some(site => tab.url.includes(site));
+            const isBlocked = blockedSites.some(site => tab.url.includes(site));
+            
+            if (isBlocked) {
+              chrome.tabs.update(tab.id, { url: chrome.runtime.getURL("blocker.html") });
+            } else if (!isAllowed) {
+              chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: blurPageContent
+              }).catch(err => {
+                console.log("Could not re-blur page:", err);
+              });
+            }
+          }
+        });
+      });
+    }
+  }
 });
 
 chrome.webNavigation.onBeforeNavigate.addListener((details) => {
   if (focusActive && details.frameId === 0) { // Only main frame
     const url = details.url;
     
+    console.log('Navigation attempt:', url, 'focusActive:', focusActive, 'onBreak:', onBreak);
+    
+    // If on break, don't block anything
+    if (onBreak) {
+      console.log('On break - allowing navigation to:', url);
+      return;
+    }
+    
     // Check if site should be completely blocked
     if (blockedSites.some(site => url.includes(site))) {
+      console.log('Blocking navigation to:', url);
       chrome.tabs.update(details.tabId, { url: chrome.runtime.getURL("blocker.html") });
       return;
     }
@@ -125,6 +195,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
     const isAllowed = allowedSites.some(site => url.includes(site));
     
     if (!isAllowed) {
+      console.log('Will blur:', url);
       // Site should be blurred - inject blur script after page loads
       setTimeout(() => {
         chrome.scripting.executeScript({
@@ -134,6 +205,8 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
           console.log("Could not blur page:", err);
         });
       }, 1000); // Small delay to ensure page content is loaded
+    } else {
+      console.log('Allowed site, no blur:', url);
     }
   }
 });
@@ -143,13 +216,22 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (focusActive && changeInfo.status === 'complete' && tab.url) {
     const url = tab.url;
     
+    console.log('Tab updated:', url, 'focusActive:', focusActive, 'onBreak:', onBreak);
+    
     // Skip chrome:// and extension pages
     if (url.startsWith('chrome://') || url.startsWith('chrome-extension://')) {
       return;
     }
     
+    // If on break, don't block anything
+    if (onBreak) {
+      console.log('On break - allowing tab update to:', url);
+      return;
+    }
+    
     // Check if site should be completely blocked
     if (blockedSites.some(site => url.includes(site))) {
+      console.log('Blocking tab update to:', url);
       chrome.tabs.update(tabId, { url: chrome.runtime.getURL("blocker.html") });
       return;
     }
@@ -158,6 +240,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     const isAllowed = allowedSites.some(site => url.includes(site));
     
     if (!isAllowed) {
+      console.log('Will blur tab:', url);
       // Site should be blurred
       setTimeout(() => {
         chrome.scripting.executeScript({
@@ -167,6 +250,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           console.log("Could not blur page:", err);
         });
       }, 500);
+    } else {
+      console.log('Allowed site, no blur for tab:', url);
     }
   }
 });
