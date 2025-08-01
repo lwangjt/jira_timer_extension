@@ -71,6 +71,36 @@
       background: rgba(255, 255, 255, 0.3);
       transform: translateY(-2px);
     }
+
+    #event-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    #event-list li {
+      background: rgba(255, 255, 255, 0.2);
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+
+    #free-slot-list {
+      list-style-type: none;
+      padding: 0;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    #free-slot-list li {
+      background: rgba(255, 255, 255, 0.2);
+      margin: 10px 0;
+      padding: 15px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
@@ -83,23 +113,17 @@
       <div>Currently working on:</div>
       <div class="task-key" id="current-task">Loading...</div>
     </div>
+
+    <ul id="event-list"></ul>
+    <ul id="free-slot-list"></ul>
     
     <p class="message">You got this! Your future self will thank you.</p>
     
-    <button onclick="window.history.back()">Go Back</button>
-    <button onclick="window.close()">Close Tab</button>
+    <button id="close-tab">Close Tab</button>
+    <button id="sync-calendar">Sync Calendar</button>
+    <button id="suggest-focus-time">Suggest Focus Time</button>
   </div>
 
-  <script>
-    // Get current task information from storage
-    chrome.storage.local.get(['focusTask', 'taskData'], function(result) {
-      const taskInfo = document.getElementById('current-task');
-      if (result.focusTask) {
-        taskInfo.textContent = result.focusTask;
-      } else {
-        taskInfo.textContent = 'Focus Session';
-      }
-    });
-  </script>
+  <script src="blocker.js"></script>
 </body>
 </html>
